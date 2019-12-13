@@ -69,7 +69,7 @@ namespace UniLog
                 {
                 case Level.Debug:
                 case Level.Info:
-                    unityLogger.Log($"{name}: {outMsg});
+                    unityLogger.Log($"{name}: {outMsg}");
                     break;
                 case Level.Warn:
                     unityLogger.LogWarning(name, outMsg);
