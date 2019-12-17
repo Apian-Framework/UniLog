@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System;
 
@@ -40,6 +41,14 @@ namespace UniLog
         {
             // level and format only get applied if the logger is new
             return  UniLoggerCollection.GetLogger(name);
+        }
+
+        public static void SetupLevels(Dictionary<string,string> levels)
+        {
+            foreach (string lName in levels.Keys)
+            {
+                GetLogger(lName).LogLevel = LevelNames.FirstOrDefault(x => x.Value == levels[lName]).Key;
+            }
         }
 
 #if UNITY_2019_1_OR_NEWER
