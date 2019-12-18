@@ -73,7 +73,8 @@ namespace UniLog
         {
             if (lvl >= LogLevel)
             {
-                string outMsg = string.Format(LogFormat, LevelNames[lvl], msg);
+                string outMsg = string.Format(LogFormat, name, LevelNames[lvl], msg);                
+                //string outMsg = string.Format(LogFormat, LevelNames[lvl], msg);
                 switch (lvl)
                 {
                 case Level.Debug:
