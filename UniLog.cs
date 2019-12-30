@@ -14,7 +14,7 @@ namespace UniLog
         {
             Debug = 10,               
             Info = 20,
-            Warn = 30,
+            Warn = 30,         
             Error = 40,
             Off = 1000,            
         }
@@ -26,8 +26,8 @@ namespace UniLog
         {
             {Level.Debug, "Debug"},
             {Level.Info, "Info"},
-            {Level.Warn, "Warn"},                                    
-            {Level.Error, "Error"},
+            {Level.Warn, "Warn"},                                                  
+            {Level.Error, "Error"},         
             {Level.Off, "Off"},              
         };
 
@@ -35,7 +35,8 @@ namespace UniLog
         // 1 = level
         // 2 = message
 
-        public Level defaultLevel = Level.Warn;
+        public static Level defaultLevel = Level.Warn;
+        public static bool defaultThrowOnError = false;
 
         public static UniLogger GetLogger(string name)
         {
@@ -66,6 +67,7 @@ namespace UniLog
             Name = name;
             LogLevel = defaultLevel;
             LogFormat = defaultFormat;
+            ThrowOnError = defaultThrowOnError;
             unityLogger  = new UnityEngine.Logger(UnityEngine.Debug.unityLogger.logHandler);            
         }
 
@@ -85,7 +87,10 @@ namespace UniLog
                     unityLogger.LogWarning(name, outMsg);
                     break;
                 case Level.Error:
-                    unityLogger.LogError(name, outMsg);
+                    if (ThrowOnError)
+                        throw new Exception($"{name}: {outMsg}"));
+                    else
+                        unityLogger.LogError(name, outMsg);
                     break;   
                 }             
             }
@@ -103,6 +108,7 @@ namespace UniLog
             Name = name;
             LogLevel = defaultLevel;
             LogFormat = defaultFormat;
+            ThrowOnError = defaultThrowOnError;
         }
 
         protected void _Write(string name, Level lvl, string msg)
@@ -110,7 +116,11 @@ namespace UniLog
             if (lvl >= LogLevel)
             {
                 string outMsg = string.Format(LogFormat, name, LevelNames[lvl], msg);
-                Console.WriteLine(outMsg);
+
+                if (lvl >= Level.Error && ThrowOnError)
+                    throw new Exception(outMsg);
+                else
+                    Console.WriteLine(outMsg);
             }
         }
 
@@ -119,6 +129,8 @@ namespace UniLog
         public string Name {get; private set;}
         public Level LogLevel {get; set;}            
         public string LogFormat {get; set;}
+
+        public bool ThrowOnError {get; set;}
 
         public void Info(string msg) => _Write(Name, Level.Info, msg);
         public void Debug(string msg) => _Write(Name, Level.Debug, msg);        
