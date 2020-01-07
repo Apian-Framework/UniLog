@@ -88,7 +88,7 @@ namespace UniLog
                     break;
                 case Level.Error:
                     if (ThrowOnError)
-                        throw new Exception($"{name}: {outMsg}"));
+                        throw new Exception($"{name}: {outMsg}");
                     else
                         unityLogger.LogError(name, outMsg);
                     break;   
