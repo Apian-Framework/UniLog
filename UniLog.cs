@@ -12,10 +12,11 @@ namespace UniLog
     {
         public enum Level 
         {
-            Debug = 10,               
-            Info = 20,
-            Warn = 30,         
-            Error = 40,
+            Debug = 10,      
+            Verbose = 20,         
+            Info = 30,
+            Warn = 40,         
+            Error = 50,
             Off = 1000,            
         }
 
@@ -25,6 +26,7 @@ namespace UniLog
         public static Dictionary<Level, string> LevelNames = new Dictionary<Level, string>()
         {
             {Level.Debug, "Debug"},
+            {Level.Verbose, "Verbose"},            
             {Level.Info, "Info"},
             {Level.Warn, "Warn"},                                                  
             {Level.Error, "Error"},         
@@ -80,6 +82,7 @@ namespace UniLog
                 switch (lvl)
                 {
                 case Level.Debug:
+                case Level.Verbose:                
                 case Level.Info:
                     unityLogger.Log($"{name}: {outMsg}");
                     break;
@@ -133,6 +136,7 @@ namespace UniLog
         public bool ThrowOnError {get; set;}
 
         public void Info(string msg) => _Write(Name, Level.Info, msg);
+        public void Verbose(string msg) => _Write(Name, Level.Verbose, msg);        
         public void Debug(string msg) => _Write(Name, Level.Debug, msg);        
         public void Warn(string msg) => _Write(Name, Level.Warn, msg);
         public void Error(string msg) => _Write(Name, Level.Error, msg);                
