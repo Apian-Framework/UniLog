@@ -49,6 +49,12 @@ namespace UniLog
             return  UniLoggerCollection.GetLogger(name);
         }
 
+        public static Level LevelFromName(string name)
+        {
+            Level l = LevelNames.FirstOrDefault(x => x.Value == name).Key;
+            return l==0 ? DefaultLevel : l;
+        }
+
         public static void SetupLevels(Dictionary<string,string> levels)
         {
             foreach (string lName in levels.Keys)
