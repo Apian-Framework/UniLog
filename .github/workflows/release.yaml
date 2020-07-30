@@ -32,7 +32,7 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
       - name: Create Package
-        run: dotnet pack dotnet pack -c Release /p:Version=${{ github.event.release.tag_name }} /p:PackageReleaseNotes="See https://github.com/Apian-Framework/Unilog/releases/tag/${{ github.event.release.tag_name }}"
+        run: dotnet pack -c Release /p:Version=${{ github.event.release.tag_name }} /p:PackageReleaseNotes="See https://github.com/Apian-Framework/Unilog/releases/tag/${{ github.event.release.tag_name }}"
       - name: Publish the package to GPR
         run: dotnet nuget push **/*.nupkg
 
