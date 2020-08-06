@@ -1,0 +1,12 @@
+{
+    "name": "com.apian-framework.unilog",
+    "displayName": "UniLog",
+    "version": "1.0.4",
+    "unity": "2018.1",
+    "description": "Yet another logger",
+    "keywords": [
+        "logger",
+        "unity"
+    ],
+    "category": "Unity"
+}
