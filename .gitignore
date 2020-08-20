@@ -5,6 +5,8 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
+*.meta
+*.asmdef
 srcassets/
 .vscode/
 inspectcode.xml
