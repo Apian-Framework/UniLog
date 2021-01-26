@@ -32,19 +32,6 @@ jobs:
       with:
         path: main
 
-    - name: Checkout Apian dependencies (UniLog)
-      uses: actions/checkout@v2
-      with:
-        repository: Apian-Framework/UniLog
-        path: UniLog
-
-    - name: Checkout Apian dependencies (P2pNet)
-      uses: actions/checkout@v2
-      with:
-        repository: Apian-Framework/P2pNet
-        path: P2pNet
-
-
     - name: Restore dependencies
       run: dotnet restore
       working-directory: main
