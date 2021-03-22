@@ -63,6 +63,11 @@ namespace UniLog
             }
         }
 
+        public static string Short(string str, int len=8)
+        {
+            return str.Substring(0, len);
+        }
+
 #if UNITY_2019_1_OR_NEWER
 
         public string DefaultFormat = "{1}: {2}";
