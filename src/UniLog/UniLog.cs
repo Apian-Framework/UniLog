@@ -71,7 +71,7 @@ namespace UniLog
 
 #if UNITY_2019_1_OR_NEWER
 
-        public string DefaultFormat = "{1}: {2}";
+        public string DefaultFormat = "{1}:{2}";
 
         //
         // Unity Implementation
@@ -81,7 +81,7 @@ namespace UniLog
 
         public UniLogger(string name)
         {
-            Name = name;
+            LoggerName = name;
             LogLevel = DefaultLevel;
             LogFormat = DefaultFormat;
             ThrowOnError = DefaultThrowOnError;
@@ -89,26 +89,29 @@ namespace UniLog
             unityLogger  = new UnityEngine.Logger(UnityEngine.Debug.unityLogger.logHandler);
         }
 
+        // The unity formatting is a litte hinky because I'm trying to have warn, error, and info messages appear
+        // the same (including timestamps.) I'm not putting the timestamp in an exceptio strin - tho I may change my mind
         private void _Write(string loggerName, Level lvl, string msg)
         {
             if (lvl >= LogLevel)
             {
+                string timeStr = TimeFormat == null ? "" : DateTime.UtcNow.ToString(TimeFormat);
                 string outMsg = string.Format(LogFormat, loggerName, LevelNames[lvl], msg);
                 switch (lvl)
                 {
                 case Level.Debug:
                 case Level.Verbose:
                 case Level.Info:
-                    unityLogger.Log($"{loggerName}: {outMsg}");
+                    unityLogger.Log($"{timeStr}{loggerName}:{outMsg}");
                     break;
                 case Level.Warn:
-                    unityLogger.LogWarning(loggerName, outMsg);
+                    unityLogger.LogWarning(timeStr+loggerName, outMsg);
                     break;
                 case Level.Error:
                     if (ThrowOnError)
-                        throw new Exception($"{loggerName}: {outMsg}");
+                        throw new Exception($"{loggerName}:{outMsg}");
                     else
-                        unityLogger.LogError(loggerName, outMsg);
+                        unityLogger.LogError(timeStr+loggerName, outMsg);
                     break;
                 }
             }
