@@ -42,7 +42,8 @@ namespace UniLog
 
         public static Level DefaultLevel = Level.Warn;
         public static bool DefaultThrowOnError = false;
-
+        public static string DefaultTimeFormat = "[HH:mm:ss.fff] ";  //  [14:23:04.030] - note the trailing space
+        //public static string DefaultTimeFormat = null;  // Set to null to not show time
         public static UniLogger GetLogger(string name)
         {
             // level and format only get applied if the logger is new
@@ -63,7 +64,7 @@ namespace UniLog
             }
         }
 
-        public static string Short(string str, int len=8)
+        public static string sid(string str, int len=8)  // "short ID" - just how the leftmost "n" chars of an id
         {
             return str.Substring(0, len);
         }
@@ -84,30 +85,30 @@ namespace UniLog
             LogLevel = DefaultLevel;
             LogFormat = DefaultFormat;
             ThrowOnError = DefaultThrowOnError;
+            TimeFormat = DefaultTimeFormat;
             unityLogger  = new UnityEngine.Logger(UnityEngine.Debug.unityLogger.logHandler);
         }
 
-        private void _Write(string name, Level lvl, string msg)
+        private void _Write(string loggerName, Level lvl, string msg)
         {
             if (lvl >= LogLevel)
             {
-                string outMsg = string.Format(LogFormat, name, LevelNames[lvl], msg);
-                //string outMsg = string.Format(LogFormat, LevelNames[lvl], msg);
+                string outMsg = string.Format(LogFormat, loggerName, LevelNames[lvl], msg);
                 switch (lvl)
                 {
                 case Level.Debug:
                 case Level.Verbose:
                 case Level.Info:
-                    unityLogger.Log($"{name}: {outMsg}");
+                    unityLogger.Log($"{loggerName}: {outMsg}");
                     break;
                 case Level.Warn:
-                    unityLogger.LogWarning(name, outMsg);
+                    unityLogger.LogWarning(loggerName, outMsg);
                     break;
                 case Level.Error:
                     if (ThrowOnError)
-                        throw new Exception($"{name}: {outMsg}");
+                        throw new Exception($"{loggerName}: {outMsg}");
                     else
-                        unityLogger.LogError(name, outMsg);
+                        unityLogger.LogError(loggerName, outMsg);
                     break;
                 }
             }
@@ -118,21 +119,23 @@ namespace UniLog
         // Non-unity
         //
 
-        public string DefaultFormat = "[{0}] {1}: {2}";
+        public string DefaultFormat = "{0}{1}:{2}:{3}"; // timestamp, loggerName, level, msg
 
         public UniLogger(string name)
         {
-            Name = name;
+            LoggerName = name;
             LogLevel = DefaultLevel;
             LogFormat = DefaultFormat;
             ThrowOnError = DefaultThrowOnError;
+            TimeFormat = DefaultTimeFormat;
         }
 
-        private void _Write(string name, Level lvl, string msg)
+        private void _Write(string loggerName, Level lvl, string msg)
         {
             if (lvl >= LogLevel)
             {
-                string outMsg = string.Format(LogFormat, name, LevelNames[lvl], msg);
+                string timeStr = TimeFormat == null ? "" : DateTime.UtcNow.ToString(TimeFormat);
+                string outMsg = string.Format(LogFormat, timeStr, loggerName, LevelNames[lvl], msg);
 
                 if (lvl >= Level.Error && ThrowOnError)
                     throw new Exception(outMsg);
@@ -144,16 +147,17 @@ namespace UniLog
 #endif
 
         // Instance
-        public string Name {get;}
+        public string LoggerName {get;}
         public Level LogLevel;
         public string LogFormat;
+        public string TimeFormat;
         public bool ThrowOnError;
 
-        public void Info(string msg) => _Write(Name, Level.Info, msg);
-        public void Verbose(string msg) => _Write(Name, Level.Verbose, msg);
-        public void Debug(string msg) => _Write(Name, Level.Debug, msg);
-        public void Warn(string msg) => _Write(Name, Level.Warn, msg);
-        public void Error(string msg) => _Write(Name, Level.Error, msg);
+        public void Info(string msg) => _Write(LoggerName, Level.Info, msg);
+        public void Verbose(string msg) => _Write(LoggerName, Level.Verbose, msg);
+        public void Debug(string msg) => _Write(LoggerName, Level.Debug, msg);
+        public void Warn(string msg) => _Write(LoggerName, Level.Warn, msg);
+        public void Error(string msg) => _Write(LoggerName, Level.Error, msg);
 
         // End  API
         // ReSharper enable MemberCanBePrivate.Global,UnusedMember.Global,FieldCanBeMadeReadOnly.Global
