@@ -64,7 +64,7 @@ namespace UniLog
             }
         }
 
-        public static string sid(string str, int len=8)  // "short ID" - just how the leftmost "n" chars of an id
+        public static string SID(string str, int len=8)  // "short ID" - just how the leftmost "n" chars of an id
         {
             return str.Substring(0, len);
         }
