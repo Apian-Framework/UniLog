@@ -71,7 +71,7 @@ namespace UniLog
 
 #if UNITY_2019_1_OR_NEWER
 
-        public string DefaultFormat = "{1}:{2}";
+        public string DefaultFormat = "{1} {2}";
 
         //
         // Unity Implementation
@@ -122,7 +122,7 @@ namespace UniLog
         // Non-unity
         //
 
-        public string DefaultFormat = "{0}{1}:{2}:{3}"; // timestamp, loggerName, level, msg
+        public string DefaultFormat = "{0}{1}:{2} {3}"; // timestamp, loggerName, level, msg
 
         public UniLogger(string name)
         {
