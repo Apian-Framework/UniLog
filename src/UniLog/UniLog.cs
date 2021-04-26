@@ -46,8 +46,7 @@ namespace UniLog
         //public static string DefaultTimeFormat = null;  // Set to null to not show time
         public static UniLogger GetLogger(string name)
         {
-            // level and format only get applied if the logger is new
-            return  UniLoggerCollection.GetLogger(name);
+            return  UniLoggerCollectionSingleton.GetLogger(name);
         }
 
         public static Level LevelFromName(string name)
@@ -169,33 +168,33 @@ namespace UniLog
 
     public class UniLoggerCollection
     {
-        private readonly Dictionary<string, UniLogger> _loggers;
+        protected readonly Dictionary<string, UniLogger> _loggers;
 
-        //
-        // Yeah, it's a singleton
-        //
-        private static UniLoggerCollection _instance;
-
-        public static UniLoggerCollection GetInstance()
-        {
-            _instance = _instance ?? new UniLoggerCollection();
-            return _instance;
-        }
-        public static UniLogger GetLogger(string name)
-        {
-            UniLoggerCollection inst = GetInstance();
-            return inst._loggers.ContainsKey(name) ? inst._loggers[name] : inst.AddLogger(name);
-        }
-
-        private UniLoggerCollection()
+        public UniLoggerCollection()
         {
             _loggers = new Dictionary<string, UniLogger>();
         }
 
-        private  UniLogger AddLogger(string name)
+        public UniLogger GetLogger(string name)
+        {
+            return _loggers.ContainsKey(name) ? _loggers[name] : AddLogger(name);
+        }
+
+        protected UniLogger AddLogger(string name)
         {
             return _loggers[name] = new UniLogger(name);
         }
+    }
 
+    public class UniLoggerCollectionSingleton
+    {
+        // This class isn't really the singleton: the collection it manages is.
+        protected static UniLoggerCollection _collectionInstance;
+
+        public static UniLogger GetLogger(string name)
+        {
+            _collectionInstance = _collectionInstance ?? new UniLoggerCollection();
+            return _collectionInstance.GetLogger(name);
+        }
     }
 }
