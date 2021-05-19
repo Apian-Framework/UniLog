@@ -8,6 +8,7 @@
 [Bb]uilds/
 [Ll]ogs/
 [Cc]overage/
+*.code-workspace
 srcassets/
 .vscode/
 .vs/
