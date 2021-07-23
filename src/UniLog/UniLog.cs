@@ -177,10 +177,10 @@ namespace UniLog
 
         public UniLogger GetLogger(string name)
         {
-            return _loggers.ContainsKey(name) ? _loggers[name] : AddLogger(name);
+            return _loggers.ContainsKey(name) ? _loggers[name] : _AddLogger(name);
         }
 
-        protected UniLogger AddLogger(string name)
+        private UniLogger _AddLogger(string name)
         {
             return _loggers[name] = new UniLogger(name);
         }
