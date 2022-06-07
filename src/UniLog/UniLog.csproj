@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Version>1.0.4</Version>
     <RepositoryUrl>https://github.com/Apian-Framework/UniLog</RepositoryUrl>
-
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
 </Project>
