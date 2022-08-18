@@ -49,6 +49,8 @@ namespace UniLog
             return  UniLoggerCollectionSingleton.GetLogger(name);
         }
 
+        public static IList<UniLogger> AllLoggers => UniLoggerCollectionSingleton.AllLoggers;
+
         public static Level LevelFromName(string name)
         {
             Level l = LevelNames.FirstOrDefault(x => x.Value == name).Key;
@@ -175,6 +177,8 @@ namespace UniLog
             _loggers = new Dictionary<string, UniLogger>();
         }
 
+        public IList< UniLogger> AllLoggers => _loggers.Values.ToList();
+
         public UniLogger GetLogger(string name)
         {
             return _loggers.ContainsKey(name) ? _loggers[name] : _AddLogger(name);
@@ -190,6 +194,8 @@ namespace UniLog
     {
         // This class isn't really the singleton: the collection it manages is.
         protected static UniLoggerCollection _collectionInstance;
+
+        public static IList<UniLogger> AllLoggers => _collectionInstance?.AllLoggers;
 
         public static UniLogger GetLogger(string name)
         {
