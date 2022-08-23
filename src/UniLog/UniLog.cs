@@ -65,6 +65,11 @@ namespace UniLog
             }
         }
 
+        public static Dictionary<string, string> CurrentLoggerLevels()
+        {
+             return UniLoggerCollectionSingleton.AllLoggers.ToDictionary(l => l.LoggerName, l => UniLogger.LevelNames[l.LogLevel]);
+        }
+
         public static string SID(string str, int len=8)  // "short ID" - just how the leftmost "n" chars of an id
         {
             return str == null ? "" : str.Substring(0, len);
