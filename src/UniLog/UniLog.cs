@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using System;
 
+#if UNITY_2019_1_OR_NEWER
+using UnityEngine;
+#endif
+
+//
+// TODO: this is a horrible mess of #if macros. Probably would be better to separate non-Unity,
+//       Unity, and Unity running under the editor
+//
+
 namespace UniLog
 {
     //
@@ -80,11 +89,12 @@ namespace UniLog
         public string DefaultFormat = "{1} {2}";
 
         //
-        // Unity Implementation
+        // Unity
         //
 
+#if UNITY_EDITOR
         protected UnityEngine.Logger unityLogger;
-
+#endif
         public UniLogger(string name)
         {
             LoggerName = name;
@@ -92,11 +102,17 @@ namespace UniLog
             LogFormat = DefaultFormat;
             ThrowOnError = DefaultThrowOnError;
             TimeFormat = DefaultTimeFormat;
+#if UNITY_EDITOR
+            // Running in the editor, this looger writes better messages
             unityLogger  = new UnityEngine.Logger(UnityEngine.Debug.unityLogger.logHandler);
+#endif
         }
 
         // The unity formatting is a litte hinky because I'm trying to have warn, error, and info messages appear
-        // the same (including timestamps.) I'm not putting the timestamp in an exceptio strin - tho I may change my mind
+        // the same (including timestamps.) I'm not putting the timestamp in an exceptio string - tho I may change my mind
+        // ALSO: by using LogFormat() instead of Log() I can supress the stack trace that is otherwise included.
+        // Turns out that logging itself is not necessarily much of a performance hit, but stack traces involve reflection,
+        // and that is super slow.
         private void _Write(string loggerName, Level lvl, string msg)
         {
             if (lvl >= LogLevel)
@@ -108,16 +124,28 @@ namespace UniLog
                 case Level.Debug:
                 case Level.Verbose:
                 case Level.Info:
+#if UNITY_EDITOR
                     unityLogger.Log($"{timeStr}{loggerName}:{outMsg}");
+#else
+                     UnityEngine.Debug.LogFormat( LogType.Log, LogOption.NoStacktrace, null, "{0}", $"{timeStr}{loggerName}:{outMsg}");
+#endif
                     break;
                 case Level.Warn:
+#if UNITY_EDITOR
                     unityLogger.LogWarning(timeStr+loggerName, outMsg);
+#else
+                    UnityEngine.Debug.LogFormat( LogType.Warning, LogOption.NoStacktrace, null, "{0}", $"{timeStr}{loggerName}:{outMsg}");
+#endif
                     break;
                 case Level.Error:
                     if (ThrowOnError)
                         throw new Exception($"{loggerName}:{outMsg}");
                     else
+#if UNITY_EDITOR
                         unityLogger.LogError(timeStr+loggerName, outMsg);
+#else
+                        UnityEngine.Debug.LogFormat( LogType.Error, LogOption.None, null, "{0}", $"{timeStr}{loggerName}:{outMsg}");
+#endif
                     break;
                 }
             }
