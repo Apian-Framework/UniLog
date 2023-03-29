@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <DebugType>portable</DebugType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild"  Version="2.9.0">
+    <PackageReference Include="coverlet.msbuild" Version="2.9.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -30,12 +30,10 @@
     <Include>[UniLog]*</Include>
   </PropertyGroup>
 
-  <Target Name="GenerateHtmlCoverageReport" AfterTargets="GenerateCoverageResultAfterTest"
-      Condition="Exists('./coverage/coverage.cobertura.xml')">
+  <Target Name="GenerateHtmlCoverageReport" AfterTargets="GenerateCoverageResultAfterTest" Condition="Exists('./coverage/coverage.cobertura.xml')">
     <Message Text="Generating coverage report from @(CoverletReport)" />
     <!-- Docs: https://github.com/danielpalme/ReportGenerator -->
-    <ReportGenerator ReportFiles="./coverage/coverage.cobertura.xml" TargetDirectory="./coverage/reports"
-        ReportTypes="html;badges" VerbosityLevel="Warning" />
+    <ReportGenerator ReportFiles="./coverage/coverage.cobertura.xml" TargetDirectory="./coverage/reports" ReportTypes="html;badges" VerbosityLevel="Warning" />
   </Target>
 
 </Project>
