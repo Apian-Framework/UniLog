@@ -18,7 +18,7 @@ namespace UniLogTests
         [TestCase(UniLogger.Level.Warn, "Warn")]
         [TestCase(UniLogger.Level.Error, "Error")]
         [TestCase(UniLogger.Level.Off, "Off")]
-        [TestCase(UniLogger.Level.Warn, "NoLevelNamedThis")]
+        [TestCase(UniLogger.Level.Warn, "NoLevelNamedThis")]  // warn is default
         public void LevelFromName_Works(UniLogger.Level lvl, string name)
         {
             Assert.That(UniLogger.LevelFromName(name), Is.EqualTo(lvl));
@@ -62,8 +62,6 @@ namespace UniLogTests
             Assert.That(UniLogger.GetLogger("InfoLogger").LogLevel, Is.EqualTo(UniLogger.Level.Info));
 
         }
-
-
 
     }
 

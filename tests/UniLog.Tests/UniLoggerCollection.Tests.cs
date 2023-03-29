@@ -75,12 +75,12 @@ namespace UniLogTests
 
         }
 
-        [Test]
-        public void AddLoggers()
-        {
+        // [Test]
+        // public void AddLoggers()
+        // {
 
 
-        }
+        // }
 
     }
 
