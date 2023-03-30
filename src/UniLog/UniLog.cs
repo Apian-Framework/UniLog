@@ -53,6 +53,12 @@ namespace UniLog
         public static bool DefaultThrowOnError = false;
         public static string DefaultTimeFormat = "[HH:mm:ss.fff] ";  //  [14:23:04.030] - note the trailing space
         //public static string DefaultTimeFormat = null;  // Set to null to not show time
+
+        public static void Initialize(UniLoggerCollection coll = null)
+        {
+            UniLoggerCollectionSingleton.Initialize(coll);
+        }
+
         public static UniLogger GetLogger(string name)
         {
             return  UniLoggerCollectionSingleton.GetLogger(name);
@@ -227,6 +233,11 @@ namespace UniLog
     {
         // This class isn't really the singleton: the collection it manages is.
         protected static UniLoggerCollection _collectionInstance;
+
+        public static void Initialize(UniLoggerCollection coll = null)
+        {
+            _collectionInstance = coll;
+        }
 
         public static IList<UniLogger> AllLoggers => _collectionInstance?.AllLoggers;
 
