@@ -155,7 +155,7 @@ namespace UniLogTests
                 Console.SetOut(sw);
 
                 l.Verbose(message);
-                Assert.That(sw.ToString(), Does.StartWith($"{timeFormat}{loggerName}:Verbose {message}"));
+                Assert.That(sw.ToString().Trim(), Is.EqualTo($"{timeFormat}{loggerName}:Verbose {message}"));
             }
         }
 
@@ -175,7 +175,7 @@ namespace UniLogTests
 
                 l.Verbose(message);
                 // Just  logger:level message
-                Assert.That(sw.ToString(), Is.EqualTo($"{loggerName}:Verbose {message}\r\n"));
+                Assert.That(sw.ToString().Trim(), Is.EqualTo($"{loggerName}:Verbose {message}"));
             }
         }
 
