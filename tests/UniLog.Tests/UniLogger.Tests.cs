@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,7 +24,7 @@ namespace UniLogTests
         [TestCase(UniLogger.Level.Debug, "Debug")]
         [TestCase(UniLogger.Level.Verbose, "Verbose")]
         [TestCase(UniLogger.Level.Info, "Info")]
-        [TestCase(UniLogger.Level.Warn, "Warnxxxx")]
+        [TestCase(UniLogger.Level.Warn, "Warn")]
         [TestCase(UniLogger.Level.Error, "Error")]
         [TestCase(UniLogger.Level.Off, "Off")]
         [TestCase(UniLogger.Level.Warn, "NoLevelNamedThis")]  // warn is default
@@ -66,6 +68,10 @@ namespace UniLogTests
                 {"InfoLogger","Info"},
             };
 
+
+            IList<UniLogger> allLoggers = UniLogger.AllLoggers;
+            Assert.That(allLoggers, Is.Null);
+
             UniLogger.SetupLevels(loggers);
 
             Assert.That(UniLogger.GetLogger("DebugLogger").LogLevel, Is.EqualTo(UniLogger.Level.Debug));
@@ -77,13 +83,103 @@ namespace UniLogTests
             Dictionary<string, string> curLevels = UniLogger.CurrentLoggerLevels();
             Assert.That(curLevels.Values.Count, Is.EqualTo(5));
 
-            IList<UniLogger> allLoggers = UniLogger.AllLoggers;
+            allLoggers = UniLogger.AllLoggers;
             Assert.That(allLoggers.Count, Is.EqualTo(5));
 
+        }
+
+        // Logger level, logger level name
+        [TestCase(UniLogger.Level.Debug, "Debug")]
+        [TestCase(UniLogger.Level.Verbose, "Verbose")]
+        [TestCase(UniLogger.Level.Info, "Info")]
+        [TestCase(UniLogger.Level.Warn, "Warn")]
+        [TestCase(UniLogger.Level.Error, "Error")]
+        [TestCase(UniLogger.Level.Off, "Off")]
+        public void TestDebug(UniLogger.Level loggerLvl, string loggerLvlName)
+        {
+            const string LoggerName = "ThisTestLogger";
+            const string Message = "This is the message";
+
+            UniLogger logger = UniLogger.GetLogger(LoggerName);
+            logger.LogLevel = loggerLvl;
+
+            // Levels, in order, but without "off"
+            IList<UniLogger.Level> testLvls =  UniLogger.LevelNames.Keys.Where( (k) => k != UniLogger.Level.Off).ToList();
+
+            using (StringWriter sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+
+                logger.Debug(Message);
+                logger.Verbose(Message);
+                logger.Info(Message);
+                logger.Warn(Message);
+                logger.Error(Message);
+
+                foreach (UniLogger.Level tstLvl in testLvls)
+                {
+                    var tstLvlName = UniLogger.LevelNames[tstLvl];
+
+                    if ( tstLvl >= loggerLvl)
+                        Assert.That(sw.ToString(), Does.Contain($"{LoggerName}:{tstLvlName} {Message}"));
+                    else
+                        Assert.That(sw.ToString(), Does.Not.Contain($"{LoggerName}:{tstLvlName} {Message}"));
+                }
+            }
+        }
+
+        [Test]
+        public void TestThrowOnError()
+        {
+            UniLogger l = UniLogger.GetLogger("frob");
+
+            l.ThrowOnError = true;
+
+            var ex = Assert.Throws<System.Exception>( () => l.Error("This should throw"));
+            Assert.That(ex.Message, Does.Contain("This should throw"));
+        }
+
+        [Test]
+        public void TestCustomTimeFormat()
+        {
+            const string loggerName = "frob";
+            const string message = "This is the message";
+            const string timeFormat = "[WooWoo] "; // 'W', 'o', '[', ']', and space are passed through as literals
+
+            UniLogger l = UniLogger.GetLogger(loggerName);
+            l.LogLevel = UniLogger.Level.Verbose;
+            l.TimeFormat = timeFormat;
+
+            using (StringWriter sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+
+                l.Verbose(message);
+                Assert.That(sw.ToString(), Is.EqualTo($"{timeFormat}{loggerName}:Verbose {message}\r\n"));
+            }
+        }
+
+        [Test]
+        public void TestNullTimeFormat()
+        {
+            const string loggerName = "frob";
+            const string message = "This is the message";
+
+            UniLogger l = UniLogger.GetLogger(loggerName);
+            l.LogLevel = UniLogger.Level.Verbose;
+            l.TimeFormat = null;
+
+            using (StringWriter sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+
+                l.Verbose(message);
+                // Just  logger:level message
+                Assert.That(sw.ToString(), Is.EqualTo($"{loggerName}:Verbose {message}\r\n"));
+            }
         }
 
 
 
     }
-
 }
