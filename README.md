@@ -3,7 +3,7 @@
 
 **Unity 3D compatible C# logging (works without Unity, too)**
 
-Unilog is a tag-based C# logging facility for code that might be built and run under Unity 3D. When run in the Unity editor Unilog makes use of native Unity logger.
+UniLog is a tag-based C# logging facility for code that might be built and run under Unity 3D. When code is run in the Unity editor it integrates into the native Unity logger.
 
 ---
 
