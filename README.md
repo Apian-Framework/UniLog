@@ -31,7 +31,7 @@ These static `UniLogger` properties define defaults for newly created loggers.
 | ------------- |--------------------------|-----------|
 | `Level DefaultLevel` | `Level.Warn` | Only display messages of at least this severity |
 | `bool DefaultThrowOnError` | `false` | For calls to `logger.Error()` throw an exception.|
-| `tring DefaultTimeFormat` | `[HH:mm:ss.fff]` | Use this time format in every message. |
+| `string DefaultTimeFormat` | `[HH:mm:ss.fff]` | Use this time format in every message. |
 
 ### Basic logging
 
@@ -97,6 +97,6 @@ Dictionary<string, string> theLevelsDict = UniLogger.CurrentLoggerLevels();
 
 To create a saved set of loggers matching one returned by `CurrentLoggerLevels()`:
 ```
-    UniLogger.SetupLevels( theLevelsDict );
+    UniLogger.SetupLevels(theLevelsDict);
 ```
 
