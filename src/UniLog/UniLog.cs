@@ -33,8 +33,8 @@ namespace UniLog
         // Statics
         //
 
-        // Public API
-        // ReSharper disable MemberCanBePrivate.Global,UnusedMember.Global,FieldCanBeMadeReadOnly.Global
+        private static Dictionary<string, UniLogger> _loggers = new Dictionary<string, UniLogger>();
+
         public static Dictionary<Level, string> LevelNames {get;} = new Dictionary<Level, string>()
         {
             {Level.Debug, "Debug"},
@@ -45,55 +45,62 @@ namespace UniLog
             {Level.Off, "Off"},
         };
 
-        // 0 = name
-        // 1 = level
-        // 2 = message
 
-        public static Level DefaultLevel = Level.Warn;
+        //
+        // Default values for new loggers. Changing these will not affect existing loggers.
+        //
+
+        public static Level DefaultLogLevel = Level.Warn;
+
         public static bool DefaultThrowOnError = false;
-        public static string DefaultTimeFormat = "[HH:mm:ss.fff] ";  //  [14:23:04.030] - note the trailing space
-        //public static string DefaultTimeFormat = null;  // Set to null to not show time
+        // DefaultTimeFormat = null results in time not being shown
 
-        public static void Initialize(UniLoggerCollection coll = null)
-        {
-            UniLoggerCollectionSingleton.Initialize(coll);
-        }
+        public static string DefaultTimeFormat = "[HH:mm:ss.fff] ";  //  [14:23:04.030] - note the trailing space.
+
+#if UNITY_2019_1_OR_NEWER
+        public static string DefaultLogFormat = "{1} {2}"; //
+#else
+        public static string DefaultLogFormat = "{0}{1}:{2} {3}"; // timestamp, loggerName, level, msg
+#endif
 
         public static UniLogger GetLogger(string name)
         {
-            return  UniLoggerCollectionSingleton.GetLogger(name);
+            // if not in list, create/add/return a new one
+            return _loggers.ContainsKey(name) ? _loggers[name] :  _loggers[name] = new UniLogger(name);
         }
 
-        public static IList<UniLogger> AllLoggers => UniLoggerCollectionSingleton.AllLoggers;
+        // Either clear the loggers dictionary, or set it to a pre-built list
+        public static void Initialize(Dictionary<string, UniLogger> loggers = null)
+        {
+            _loggers = loggers ?? new Dictionary<string,UniLogger>();
+        }
+
+        public static IList<UniLogger> AllLoggers => _loggers.Values.ToList();
 
         public static Level LevelFromName(string name)
         {
             Level l = LevelNames.FirstOrDefault(x => x.Value == name).Key;
-            return l==0 ? DefaultLevel : l;
+            return l==0 ? DefaultLogLevel : l;
         }
 
         public static void SetupLevels(Dictionary<string,string> levels)
         {
             foreach (string lName in levels.Keys)
             {
+                Level lvl = LevelNames.FirstOrDefault(x => x.Value == levels[lName]).Key;
                 GetLogger(lName).LogLevel = LevelNames.FirstOrDefault(x => x.Value == levels[lName]).Key;
             }
         }
 
         public static Dictionary<string, string> CurrentLoggerLevels()
         {
-             return UniLoggerCollectionSingleton.AllLoggers.ToDictionary(l => l.LoggerName, l => UniLogger.LevelNames[l.LogLevel]);
+             return AllLoggers.ToDictionary(l => l.LoggerName, l => LevelNames[l.LogLevel]);
         }
 
-        public static string SID(string str, int len=8)  // "short ID" - just how the leftmost "n" chars of an id
-        {
-            return str == null ? "" : str.Substring(0, len);
-        }
+        // utility to create a "short ID" - the leftmost "n" chars of an id.
+        public static string SID(string str, int len=8) =>  str == null ? "" : str.Substring(0, len);
 
 #if UNITY_2019_1_OR_NEWER
-
-        public string DefaultFormat = "{1} {2}";
-
         //
         // Unity
         //
@@ -104,8 +111,8 @@ namespace UniLog
         public UniLogger(string name)
         {
             LoggerName = name;
-            LogLevel = DefaultLevel;
-            LogFormat = DefaultFormat;
+            LogLevel = DefaultLogLevel;
+            LogFormat = DefaultLogFormat;
             ThrowOnError = DefaultThrowOnError;
             TimeFormat = DefaultTimeFormat;
 #if UNITY_EDITOR
@@ -162,13 +169,11 @@ namespace UniLog
         // Non-unity
         //
 
-        public string DefaultFormat = "{0}{1}:{2} {3}"; // timestamp, loggerName, level, msg
-
         public UniLogger(string name)
         {
             LoggerName = name;
-            LogLevel = DefaultLevel;
-            LogFormat = DefaultFormat;
+            LogLevel = DefaultLogLevel;
+            LogFormat = DefaultLogFormat;
             ThrowOnError = DefaultThrowOnError;
             TimeFormat = DefaultTimeFormat;
         }
@@ -186,10 +191,12 @@ namespace UniLog
                     Console.WriteLine(outMsg);
             }
         }
-
 #endif
 
-        // Instance
+
+        // Logger Instance
+
+
         public string LoggerName {get;}
         public Level LogLevel;
         public string LogFormat;
@@ -203,48 +210,5 @@ namespace UniLog
         public void Error(string msg) => _Write(LoggerName, Level.Error, msg);
 
         // End  API
-        // ReSharper enable MemberCanBePrivate.Global,UnusedMember.Global,FieldCanBeMadeReadOnly.Global
 
     }
-
-    public class UniLoggerCollection
-    {
-        protected readonly Dictionary<string, UniLogger> _loggers;
-
-        public UniLoggerCollection()
-        {
-            _loggers = new Dictionary<string, UniLogger>();
-        }
-
-        public IList< UniLogger> AllLoggers => _loggers.Values.ToList();
-
-        public UniLogger GetLogger(string name)
-        {
-            return _loggers.ContainsKey(name) ? _loggers[name] : _AddLogger(name);
-        }
-
-        private UniLogger _AddLogger(string name)
-        {
-            return _loggers[name] = new UniLogger(name);
-        }
-    }
-
-    public class UniLoggerCollectionSingleton
-    {
-        // This class isn't really the singleton: the collection it manages is.
-        protected static UniLoggerCollection _collectionInstance;
-
-        public static void Initialize(UniLoggerCollection coll = null)
-        {
-            _collectionInstance = coll;
-        }
-
-        public static IList<UniLogger> AllLoggers => _collectionInstance?.AllLoggers;
-
-        public static UniLogger GetLogger(string name)
-        {
-            _collectionInstance = _collectionInstance ?? new UniLoggerCollection();
-            return _collectionInstance.GetLogger(name);
-        }
-    }
-}
