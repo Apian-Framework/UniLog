@@ -212,3 +212,4 @@ namespace UniLog
         // End  API
 
     }
+}

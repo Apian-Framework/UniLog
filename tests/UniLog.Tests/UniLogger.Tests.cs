@@ -70,7 +70,7 @@ namespace UniLogTests
 
 
             IList<UniLogger> allLoggers = UniLogger.AllLoggers;
-            Assert.That(allLoggers, Is.Null);
+            Assert.That(allLoggers, Is.Empty);
 
             UniLogger.SetupLevels(loggers);
 
