@@ -209,7 +209,5 @@ namespace UniLog
         public void Warn(string msg) => _Write(LoggerName, Level.Warn, msg);
         public void Error(string msg) => _Write(LoggerName, Level.Error, msg);
 
-        // End  API
-
     }
 }
