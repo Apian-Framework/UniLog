@@ -19,7 +19,7 @@ namespace UniLog
 
     public class UniLogger
     {
-        public enum Level
+        public enum LogLevel
         {
             Debug = 10,
             Verbose = 20,
@@ -35,14 +35,14 @@ namespace UniLog
 
         private static Dictionary<string, UniLogger> _loggers = new Dictionary<string, UniLogger>();
 
-        public static Dictionary<Level, string> LevelNames {get;} = new Dictionary<Level, string>()
+        public static Dictionary<LogLevel, string> LogLevelNames {get;} = new Dictionary<LogLevel, string>()
         {
-            {Level.Debug, "Debug"},
-            {Level.Verbose, "Verbose"},
-            {Level.Info, "Info"},
-            {Level.Warn, "Warn"},
-            {Level.Error, "Error"},
-            {Level.Off, "Off"},
+            {LogLevel.Debug, "Debug"},
+            {LogLevel.Verbose, "Verbose"},
+            {LogLevel.Info, "Info"},
+            {LogLevel.Warn, "Warn"},
+            {LogLevel.Error, "Error"},
+            {LogLevel.Off, "Off"},
         };
 
 
@@ -50,7 +50,7 @@ namespace UniLog
         // Default values for new loggers. Changing these will not affect existing loggers.
         //
 
-        public static Level DefaultLogLevel = Level.Warn;
+        public static LogLevel DefaultLogLevel = LogLevel.Warn;
 
         public static bool DefaultThrowOnError = false;
         // DefaultTimeFormat = null results in time not being shown
@@ -77,24 +77,24 @@ namespace UniLog
 
         public static IList<UniLogger> AllLoggers => _loggers.Values.ToList();
 
-        public static Level LevelFromName(string name)
+        public static LogLevel LogLevelFromName(string name)
         {
-            Level l = LevelNames.FirstOrDefault(x => x.Value == name).Key;
+            LogLevel l = LogLevelNames.FirstOrDefault(x => x.Value == name).Key;
             return l==0 ? DefaultLogLevel : l;
         }
 
-        public static void SetupLevels(Dictionary<string,string> levels)
+        public static void SetupLogLevels(Dictionary<string,string> levels)
         {
             foreach (string lName in levels.Keys)
             {
-                Level lvl = LevelNames.FirstOrDefault(x => x.Value == levels[lName]).Key;
-                GetLogger(lName).LogLevel = LevelNames.FirstOrDefault(x => x.Value == levels[lName]).Key;
+                LogLevel lvl = LogLevelNames.FirstOrDefault(x => x.Value == levels[lName]).Key;
+                GetLogger(lName).CurrentLogLevel = LogLevelNames.FirstOrDefault(x => x.Value == levels[lName]).Key;
             }
         }
 
         public static Dictionary<string, string> CurrentLoggerLevels()
         {
-             return AllLoggers.ToDictionary(l => l.LoggerName, l => LevelNames[l.LogLevel]);
+             return AllLoggers.ToDictionary(l => l.LoggerName, l => LogLevelNames[l.CurrentLogLevel]);
         }
 
         // utility to create a "short ID" - the leftmost "n" chars of an id.
@@ -111,7 +111,7 @@ namespace UniLog
         public UniLogger(string name)
         {
             LoggerName = name;
-            LogLevel = DefaultLogLevel;
+            CurrentLogLevel = DefaultLogLevel;
             LogFormat = DefaultLogFormat;
             ThrowOnError = DefaultThrowOnError;
             TimeFormat = DefaultTimeFormat;
@@ -126,31 +126,31 @@ namespace UniLog
         // ALSO: by using LogFormat() instead of Log() I can supress the stack trace that is otherwise included.
         // Turns out that logging itself is not necessarily much of a performance hit, but stack traces involve reflection,
         // and that is super slow.
-        private void _Write(string loggerName, Level lvl, string msg)
+        private void _Write(string loggerName, LogLevel lvl, string msg)
         {
-            if (lvl >= LogLevel)
+            if (lvl >= CurrentLogLevel)
             {
                 string timeStr = TimeFormat == null ? "" : DateTime.UtcNow.ToString(TimeFormat);
-                string outMsg = string.Format(LogFormat, loggerName, LevelNames[lvl], msg);
+                string outMsg = string.Format(LogFormat, loggerName, LogLevelNames[lvl], msg);
                 switch (lvl)
                 {
-                case Level.Debug:
-                case Level.Verbose:
-                case Level.Info:
+                case LogLevel.Debug:
+                case LogLevel.Verbose:
+                case LogLevel.Info:
 #if UNITY_EDITOR
                     unityLogger.Log($"{timeStr}{loggerName}:{outMsg}");
 #else
                      UnityEngine.Debug.LogFormat( LogType.Log, LogOption.NoStacktrace, null, "{0}", $"{timeStr}{loggerName}:{outMsg}");
 #endif
                     break;
-                case Level.Warn:
+                case LogLevel.Warn:
 #if UNITY_EDITOR
                     unityLogger.LogWarning(timeStr+loggerName, outMsg);
 #else
                     UnityEngine.Debug.LogFormat( LogType.Warning, LogOption.NoStacktrace, null, "{0}", $"{timeStr}{loggerName}:{outMsg}");
 #endif
                     break;
-                case Level.Error:
+                case LogLevel.Error:
                     if (ThrowOnError)
                         throw new Exception($"{loggerName}:{outMsg}");
                     else
@@ -172,20 +172,20 @@ namespace UniLog
         public UniLogger(string name)
         {
             LoggerName = name;
-            LogLevel = DefaultLogLevel;
+            CurrentLogLevel = DefaultLogLevel;
             LogFormat = DefaultLogFormat;
             ThrowOnError = DefaultThrowOnError;
             TimeFormat = DefaultTimeFormat;
         }
 
-        private void _Write(string loggerName, Level lvl, string msg)
+        private void _Write(string loggerName, LogLevel lvl, string msg)
         {
-            if (lvl >= LogLevel)
+            if (lvl >= CurrentLogLevel)
             {
                 string timeStr = TimeFormat == null ? "" : DateTime.UtcNow.ToString(TimeFormat);
-                string outMsg = string.Format(LogFormat, timeStr, loggerName, LevelNames[lvl], msg);
+                string outMsg = string.Format(LogFormat, timeStr, loggerName, LogLevelNames[lvl], msg);
 
-                if (lvl >= Level.Error && ThrowOnError)
+                if (lvl >= LogLevel.Error && ThrowOnError)
                     throw new Exception(outMsg);
                 else
                     Console.WriteLine(outMsg);
@@ -198,16 +198,16 @@ namespace UniLog
 
 
         public string LoggerName {get;}
-        public Level LogLevel;
+        public LogLevel CurrentLogLevel;
         public string LogFormat;
         public string TimeFormat;
         public bool ThrowOnError;
 
-        public void Info(string msg) => _Write(LoggerName, Level.Info, msg);
-        public void Verbose(string msg) => _Write(LoggerName, Level.Verbose, msg);
-        public void Debug(string msg) => _Write(LoggerName, Level.Debug, msg);
-        public void Warn(string msg) => _Write(LoggerName, Level.Warn, msg);
-        public void Error(string msg) => _Write(LoggerName, Level.Error, msg);
+        public void Info(string msg) => _Write(LoggerName, LogLevel.Info, msg);
+        public void Verbose(string msg) => _Write(LoggerName, LogLevel.Verbose, msg);
+        public void Debug(string msg) => _Write(LoggerName, LogLevel.Debug, msg);
+        public void Warn(string msg) => _Write(LoggerName, LogLevel.Warn, msg);
+        public void Error(string msg) => _Write(LoggerName, LogLevel.Error, msg);
 
     }
 }

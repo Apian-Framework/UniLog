@@ -21,16 +21,16 @@ namespace UniLogTests
             UniLogger.Initialize();
         }
 
-        [TestCase(UniLogger.Level.Debug, "Debug")]
-        [TestCase(UniLogger.Level.Verbose, "Verbose")]
-        [TestCase(UniLogger.Level.Info, "Info")]
-        [TestCase(UniLogger.Level.Warn, "Warn")]
-        [TestCase(UniLogger.Level.Error, "Error")]
-        [TestCase(UniLogger.Level.Off, "Off")]
-        [TestCase(UniLogger.Level.Warn, "NoLevelNamedThis")]  // warn is default
-        public void LevelFromName_Works(UniLogger.Level lvl, string name)
+        [TestCase(UniLogger.LogLevel.Debug, "Debug")]
+        [TestCase(UniLogger.LogLevel.Verbose, "Verbose")]
+        [TestCase(UniLogger.LogLevel.Info, "Info")]
+        [TestCase(UniLogger.LogLevel.Warn, "Warn")]
+        [TestCase(UniLogger.LogLevel.Error, "Error")]
+        [TestCase(UniLogger.LogLevel.Off, "Off")]
+        [TestCase(UniLogger.LogLevel.Warn, "NoLevelNamedThis")]  // warn is default
+        public void LevelFromName_Works(UniLogger.LogLevel lvl, string name)
         {
-            Assert.That(UniLogger.LevelFromName(name), Is.EqualTo(lvl));
+            Assert.That(UniLogger.LogLevelFromName(name), Is.EqualTo(lvl));
         }
 
         [TestCase( "Debug1232234234", 12)]
@@ -72,13 +72,13 @@ namespace UniLogTests
             IList<UniLogger> allLoggers = UniLogger.AllLoggers;
             Assert.That(allLoggers, Is.Empty);
 
-            UniLogger.SetupLevels(loggers);
+            UniLogger.SetupLogLevels(loggers);
 
-            Assert.That(UniLogger.GetLogger("DebugLogger").LogLevel, Is.EqualTo(UniLogger.Level.Debug));
-            Assert.That(UniLogger.GetLogger("ErrorLogger").LogLevel, Is.EqualTo(UniLogger.Level.Error));
-            Assert.That(UniLogger.GetLogger("VerboseLogger").LogLevel, Is.EqualTo(UniLogger.Level.Verbose));
-            Assert.That(UniLogger.GetLogger("WarnLogger").LogLevel, Is.EqualTo(UniLogger.Level.Warn));
-            Assert.That(UniLogger.GetLogger("InfoLogger").LogLevel, Is.EqualTo(UniLogger.Level.Info));
+            Assert.That(UniLogger.GetLogger("DebugLogger").CurrentLogLevel, Is.EqualTo(UniLogger.LogLevel.Debug));
+            Assert.That(UniLogger.GetLogger("ErrorLogger").CurrentLogLevel, Is.EqualTo(UniLogger.LogLevel.Error));
+            Assert.That(UniLogger.GetLogger("VerboseLogger").CurrentLogLevel, Is.EqualTo(UniLogger.LogLevel.Verbose));
+            Assert.That(UniLogger.GetLogger("WarnLogger").CurrentLogLevel, Is.EqualTo(UniLogger.LogLevel.Warn));
+            Assert.That(UniLogger.GetLogger("InfoLogger").CurrentLogLevel, Is.EqualTo(UniLogger.LogLevel.Info));
 
             Dictionary<string, string> curLevels = UniLogger.CurrentLoggerLevels();
             Assert.That(curLevels.Values.Count, Is.EqualTo(5));
@@ -89,22 +89,22 @@ namespace UniLogTests
         }
 
         // Logger level, logger level name
-        [TestCase(UniLogger.Level.Debug, "Debug")]
-        [TestCase(UniLogger.Level.Verbose, "Verbose")]
-        [TestCase(UniLogger.Level.Info, "Info")]
-        [TestCase(UniLogger.Level.Warn, "Warn")]
-        [TestCase(UniLogger.Level.Error, "Error")]
-        [TestCase(UniLogger.Level.Off, "Off")]
-        public void TestDebug(UniLogger.Level loggerLvl, string loggerLvlName)
+        [TestCase(UniLogger.LogLevel.Debug, "Debug")]
+        [TestCase(UniLogger.LogLevel.Verbose, "Verbose")]
+        [TestCase(UniLogger.LogLevel.Info, "Info")]
+        [TestCase(UniLogger.LogLevel.Warn, "Warn")]
+        [TestCase(UniLogger.LogLevel.Error, "Error")]
+        [TestCase(UniLogger.LogLevel.Off, "Off")]
+        public void TestDebug(UniLogger.LogLevel loggerLvl, string loggerLvlName)
         {
             const string LoggerName = "ThisTestLogger";
             const string Message = "This is the message";
 
             UniLogger logger = UniLogger.GetLogger(LoggerName);
-            logger.LogLevel = loggerLvl;
+            logger.CurrentLogLevel = loggerLvl;
 
             // Levels, in order, but without "off"
-            IList<UniLogger.Level> testLvls =  UniLogger.LevelNames.Keys.Where( (k) => k != UniLogger.Level.Off).ToList();
+            IList<UniLogger.LogLevel> testLvls =  UniLogger.LogLevelNames.Keys.Where( (k) => k != UniLogger.LogLevel.Off).ToList();
 
             using (StringWriter sw = new StringWriter())
             {
@@ -116,9 +116,9 @@ namespace UniLogTests
                 logger.Warn(Message);
                 logger.Error(Message);
 
-                foreach (UniLogger.Level tstLvl in testLvls)
+                foreach (UniLogger.LogLevel tstLvl in testLvls)
                 {
-                    var tstLvlName = UniLogger.LevelNames[tstLvl];
+                    var tstLvlName = UniLogger.LogLevelNames[tstLvl];
 
                     if ( tstLvl >= loggerLvl)
                         Assert.That(sw.ToString(), Does.Contain($"{LoggerName}:{tstLvlName} {Message}"));
@@ -147,7 +147,7 @@ namespace UniLogTests
             const string timeFormat = "[WooWoo] "; // 'W', 'o', '[', ']', and space are passed through as literals
 
             UniLogger l = UniLogger.GetLogger(loggerName);
-            l.LogLevel = UniLogger.Level.Verbose;
+            l.CurrentLogLevel = UniLogger.LogLevel.Verbose;
             l.TimeFormat = timeFormat;
 
             using (StringWriter sw = new StringWriter())
@@ -166,7 +166,7 @@ namespace UniLogTests
             const string message = "This is the message";
 
             UniLogger l = UniLogger.GetLogger(loggerName);
-            l.LogLevel = UniLogger.Level.Verbose;
+            l.CurrentLogLevel = UniLogger.LogLevel.Verbose;
             l.TimeFormat = null;
 
             using (StringWriter sw = new StringWriter())
